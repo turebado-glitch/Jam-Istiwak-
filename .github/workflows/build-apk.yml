@@ -27,6 +27,35 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Build Jam Istiwak APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
@@ -35,20 +64,21 @@ jobs:
           WORKDIR="${{ runner.temp }}/jam_istiwak_build"
           rm -rf "$WORKDIR"
           mkdir -p "$WORKDIR"
+          ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
           if [ -f "package.json" ]; then
             cp -a . "$WORKDIR/"
-          elif [ -f "jam-istiwak.zip" ]; then
+          elif [ -n "$ZIP_FILE" ]; then
             mkdir -p "${{ runner.temp }}/unzip_tmp"
-            unzip -o jam-istiwak.zip -d "${{ runner.temp }}/unzip_tmp"
+            unzip -o "$ZIP_FILE" -d "${{ runner.temp }}/unzip_tmp"
             PKG_PATH=$(find "${{ runner.temp }}/unzip_tmp" -maxdepth 3 -name "package.json" | head -n 1)
             if [ -z "$PKG_PATH" ]; then
-              echo "package.json tidak ditemukan di dalam jam-istiwak.zip"
+              echo "package.json tidak ditemukan di dalam $ZIP_FILE"
               exit 1
             fi
             SRC_DIR=$(dirname "$PKG_PATH")
             cp -a "$SRC_DIR"/. "$WORKDIR/"
           else
-            echo "Tidak ditemukan package.json maupun jam-istiwak.zip"
+            echo "Tidak ditemukan package.json maupun file .zip"
             exit 1
           fi
 
