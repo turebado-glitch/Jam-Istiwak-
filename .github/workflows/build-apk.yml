@@ -63,7 +63,7 @@ jobs:
 
       - name: Install npm dependencies
         working-directory: ${{ runner.temp }}/jam_istiwak_build
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build web bundle
         working-directory: ${{ runner.temp }}/jam_istiwak_build
@@ -87,7 +87,7 @@ jobs:
       - name: Generate launcher icons from Logo 1 (no border)
         working-directory: ${{ runner.temp }}/jam_istiwak_build
         run: |
-          python3 -c "import PIL" 2>/dev/null || python3 -m pip install --break-system-packages --quiet pillow
+          python3 -c "import PIL" 2>/dev/null || python3 -m pip install --break-system-packages --quiet pillow || (sudo apt-get update -qq && sudo apt-get install -y -qq python3-pil)
           python3 - << 'EOF'
           import os
           from PIL import Image
